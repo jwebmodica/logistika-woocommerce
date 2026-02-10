@@ -37,7 +37,7 @@ class Logistika_Api {
      * Constructor
      */
     public function __construct() {
-        $this->api_url = rtrim(get_option('logistika_api_url', ''), '/');
+        $this->api_url = 'https://logistika.jwebmodica.com/api';
         $this->api_key = get_option('logistika_api_key', '');
     }
 
@@ -47,7 +47,7 @@ class Logistika_Api {
      * @return bool
      */
     public function is_configured(): bool {
-        return !empty($this->api_url) && !empty($this->api_key);
+        return !empty($this->api_key);
     }
 
     /**

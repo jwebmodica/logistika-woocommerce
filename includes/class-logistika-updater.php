@@ -45,6 +45,9 @@ class Logistika_Updater {
 
         // Add update check link
         add_filter('plugin_action_links_' . $this->slug, array($this, 'add_check_update_link'));
+
+        // Handle manual update check from plugins page
+        add_action('admin_init', array($this, 'handle_check_update'));
     }
 
     /**
@@ -226,9 +229,31 @@ class Logistika_Updater {
      * Add check update link
      */
     public function add_check_update_link($links) {
-        $update_link = '<a href="' . wp_nonce_url(admin_url('update-core.php?force-check=1'), 'upgrade-core') . '">' . __('Verifica Aggiornamenti', 'logistika-woocommerce') . '</a>';
+        $update_link = '<a href="' . wp_nonce_url(admin_url('plugins.php?logistika_check_update=1'), 'logistika_check_update') . '">' . __('Verifica Aggiornamenti', 'logistika-woocommerce') . '</a>';
         $links[] = $update_link;
         return $links;
+    }
+
+    /**
+     * Handle manual update check - clear transient and redirect to plugins page
+     */
+    public function handle_check_update() {
+        if (!isset($_GET['logistika_check_update'])) {
+            return;
+        }
+
+        check_admin_referer('logistika_check_update');
+
+        if (!current_user_can('update_plugins')) {
+            return;
+        }
+
+        // Clear update transient to force re-check
+        delete_site_transient('update_plugins');
+
+        // Redirect back to plugins page
+        wp_safe_redirect(admin_url('plugins.php?logistika_updated=1'));
+        exit;
     }
 
 }

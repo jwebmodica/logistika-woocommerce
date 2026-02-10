@@ -35,14 +35,19 @@
 
 .stat-card {
     background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     padding: 20px;
     display: flex;
     align-items: center;
     gap: 15px;
     flex: 1;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
@@ -81,19 +86,6 @@
 }
 
 /* Quick Actions */
-.logistika-quick-actions {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    padding: 20px;
-}
-
-.logistika-quick-actions h2 {
-    margin-top: 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
 .logistika-quick-actions .button-hero {
     display: inline-flex;
     align-items: center;
@@ -108,21 +100,8 @@
 }
 
 /* Info Box */
-.logistika-info {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    padding: 20px;
-}
-
-.logistika-info h2 {
-    margin-top: 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
 .logistika-info table {
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 .logistika-info table th {
@@ -131,14 +110,6 @@
 }
 
 /* Export Filters */
-.logistika-export-filters {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
 .logistika-export-filters form {
     display: flex;
     align-items: center;
@@ -229,7 +200,7 @@
 
 .logistika-modal-content {
     background: #fff;
-    border-radius: 4px;
+    border-radius: 8px;
     max-width: 90%;
     max-height: 90%;
     overflow: auto;

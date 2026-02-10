@@ -61,13 +61,15 @@ class Logistika_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
+        $icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#009CDC"/><text x="10" y="14" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">Ka</text></svg>');
+
         add_menu_page(
             __('Logistika', 'logistika-woocommerce'),
             __('Logistika', 'logistika-woocommerce'),
             'manage_woocommerce',
             'logistika',
             array($this, 'render_main_page'),
-            'dashicons-truck',
+            $icon_svg,
             56
         );
 
@@ -134,12 +136,6 @@ class Logistika_Admin {
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
             'default' => 'processing'
-        ));
-
-        register_setting('logistika_settings', 'logistika_api_url', array(
-            'type' => 'string',
-            'sanitize_callback' => 'esc_url_raw',
-            'default' => ''
         ));
 
         register_setting('logistika_settings', 'logistika_api_key', array(
@@ -228,21 +224,30 @@ class Logistika_Admin {
                     </div>
                 </div>
 
-                <div class="logistika-quick-actions">
-                    <h2><?php _e('Azioni Rapide', 'logistika-woocommerce'); ?></h2>
-                    <a href="<?php echo admin_url('admin.php?page=logistika-export'); ?>" class="button button-primary button-hero">
-                        <span class="dashicons dashicons-download"></span> <?php _e('Esporta Ordini', 'logistika-woocommerce'); ?>
-                    </a>
-                    <a href="<?php echo admin_url('admin.php?page=logistika-settings'); ?>" class="button button-secondary button-hero">
-                        <span class="dashicons dashicons-admin-generic"></span> <?php _e('Impostazioni', 'logistika-woocommerce'); ?>
-                    </a>
-                    <a href="<?php echo admin_url('edit.php?post_type=shop_order'); ?>" class="button button-secondary button-hero">
-                        <span class="dashicons dashicons-list-view"></span> <?php _e('Tutti gli Ordini', 'logistika-woocommerce'); ?>
-                    </a>
+                <div class="logistika-card logistika-quick-actions">
+                    <div class="logistika-card-header">
+                        <span class="dashicons dashicons-superhero-alt"></span>
+                        <h2><?php _e('Azioni Rapide', 'logistika-woocommerce'); ?></h2>
+                    </div>
+                    <div class="logistika-card-body">
+                        <a href="<?php echo admin_url('admin.php?page=logistika-export'); ?>" class="button button-primary button-hero">
+                            <span class="dashicons dashicons-download"></span> <?php _e('Esporta Ordini', 'logistika-woocommerce'); ?>
+                        </a>
+                        <a href="<?php echo admin_url('admin.php?page=logistika-settings'); ?>" class="button button-secondary button-hero">
+                            <span class="dashicons dashicons-admin-generic"></span> <?php _e('Impostazioni', 'logistika-woocommerce'); ?>
+                        </a>
+                        <a href="<?php echo admin_url('edit.php?post_type=shop_order'); ?>" class="button button-secondary button-hero">
+                            <span class="dashicons dashicons-list-view"></span> <?php _e('Tutti gli Ordini', 'logistika-woocommerce'); ?>
+                        </a>
+                    </div>
                 </div>
 
-                <div class="logistika-info">
-                    <h2><?php _e('Informazioni Plugin', 'logistika-woocommerce'); ?></h2>
+                <div class="logistika-card logistika-info">
+                    <div class="logistika-card-header">
+                        <span class="dashicons dashicons-info"></span>
+                        <h2><?php _e('Informazioni Plugin', 'logistika-woocommerce'); ?></h2>
+                    </div>
+                    <div class="logistika-card-body">
                     <table class="widefat">
                         <tr>
                             <th><?php _e('Versione', 'logistika-woocommerce'); ?></th>
@@ -285,6 +290,7 @@ class Logistika_Admin {
                         </tr>
                         <?php endif; ?>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -301,39 +307,53 @@ class Logistika_Admin {
         <div class="wrap logistika-wrap">
             <h1><span class="dashicons dashicons-download"></span> <?php _e('Esporta Ordini', 'logistika-woocommerce'); ?></h1>
 
-            <div class="logistika-export-filters">
-                <form method="get" action="">
-                    <input type="hidden" name="page" value="logistika-export">
+            <div class="logistika-card">
+                <div class="logistika-card-header">
+                    <span class="dashicons dashicons-filter"></span>
+                    <h2><?php _e('Filtri', 'logistika-woocommerce'); ?></h2>
+                </div>
+                <div class="logistika-card-body">
+                    <div class="logistika-export-filters">
+                        <form method="get" action="">
+                            <input type="hidden" name="page" value="logistika-export">
 
-                    <label for="status"><?php _e('Stato:', 'logistika-woocommerce'); ?></label>
-                    <select name="status" id="status">
-                        <option value=""><?php _e('Tutti', 'logistika-woocommerce'); ?></option>
-                        <?php foreach (wc_get_order_statuses() as $status => $label): ?>
-                            <option value="<?php echo esc_attr($status); ?>" <?php selected(isset($_GET['status']) ? $_GET['status'] : '', $status); ?>>
-                                <?php echo esc_html($label); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                            <label for="status"><?php _e('Stato:', 'logistika-woocommerce'); ?></label>
+                            <select name="status" id="status">
+                                <option value=""><?php _e('Tutti', 'logistika-woocommerce'); ?></option>
+                                <?php foreach (wc_get_order_statuses() as $status => $label): ?>
+                                    <option value="<?php echo esc_attr($status); ?>" <?php selected(isset($_GET['status']) ? $_GET['status'] : '', $status); ?>>
+                                        <?php echo esc_html($label); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
 
-                    <label for="date_from"><?php _e('Da:', 'logistika-woocommerce'); ?></label>
-                    <input type="date" name="date_from" id="date_from" value="<?php echo isset($_GET['date_from']) ? esc_attr($_GET['date_from']) : ''; ?>">
+                            <label for="date_from"><?php _e('Da:', 'logistika-woocommerce'); ?></label>
+                            <input type="date" name="date_from" id="date_from" value="<?php echo isset($_GET['date_from']) ? esc_attr($_GET['date_from']) : ''; ?>">
 
-                    <label for="date_to"><?php _e('A:', 'logistika-woocommerce'); ?></label>
-                    <input type="date" name="date_to" id="date_to" value="<?php echo isset($_GET['date_to']) ? esc_attr($_GET['date_to']) : ''; ?>">
+                            <label for="date_to"><?php _e('A:', 'logistika-woocommerce'); ?></label>
+                            <input type="date" name="date_to" id="date_to" value="<?php echo isset($_GET['date_to']) ? esc_attr($_GET['date_to']) : ''; ?>">
 
-                    <label>
-                        <input type="checkbox" name="not_exported" value="1" <?php checked(isset($_GET['not_exported']) ? $_GET['not_exported'] : '', '1'); ?>>
-                        <?php _e('Solo non esportati', 'logistika-woocommerce'); ?>
-                    </label>
+                            <label>
+                                <input type="checkbox" name="not_exported" value="1" <?php checked(isset($_GET['not_exported']) ? $_GET['not_exported'] : '', '1'); ?>>
+                                <?php _e('Solo non esportati', 'logistika-woocommerce'); ?>
+                            </label>
 
-                    <button type="submit" class="button"><?php _e('Filtra', 'logistika-woocommerce'); ?></button>
-                </form>
+                            <button type="submit" class="button"><?php _e('Filtra', 'logistika-woocommerce'); ?></button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
+            <div class="logistika-card" style="margin-top: 20px;">
+                <div class="logistika-card-header">
+                    <span class="dashicons dashicons-list-view"></span>
+                    <h2><?php _e('Ordini', 'logistika-woocommerce'); ?></h2>
+                </div>
+                <div class="logistika-card-body" style="padding: 0;">
             <form method="post" id="logistika-export-form">
                 <?php wp_nonce_field('logistika_export_orders', 'logistika_nonce'); ?>
 
-                <div class="tablenav top">
+                <div class="tablenav top" style="padding: 12px 20px; margin: 0;">
                     <div class="alignleft actions bulkactions">
                         <select name="action" id="bulk-action-selector">
                             <option value=""><?php _e('Azioni di massa', 'logistika-woocommerce'); ?></option>
@@ -425,6 +445,8 @@ class Logistika_Admin {
                     </tbody>
                 </table>
             </form>
+                </div>
+            </div>
 
             <!-- Preview Modal -->
             <div id="logistika-preview-modal" class="logistika-modal" style="display:none;">
@@ -532,16 +554,11 @@ class Logistika_Admin {
                         </div>
                         <div class="logistika-card-body">
                             <div class="logistika-field">
-                                <label for="logistika_api_url"><?php _e('URL API', 'logistika-woocommerce'); ?></label>
-                                <input type="url" name="logistika_api_url" id="logistika_api_url"
-                                       value="<?php echo esc_attr(get_option('logistika_api_url', '')); ?>"
-                                       placeholder="https://tuodominio.com/logistika/app/api">
-                            </div>
-                            <div class="logistika-field">
                                 <label for="logistika_api_key"><?php _e('API Key', 'logistika-woocommerce'); ?></label>
                                 <input type="text" name="logistika_api_key" id="logistika_api_key"
                                        value="<?php echo esc_attr(get_option('logistika_api_key', '')); ?>"
                                        placeholder="La tua API Key" class="code">
+                                <span class="logistika-field-hint"><?php _e('Inserisci la chiave API fornita da Logistika', 'logistika-woocommerce'); ?></span>
                             </div>
                             <?php if ($send_method === 'api'): ?>
                             <div class="logistika-status-indicator">
@@ -660,8 +677,14 @@ class Logistika_Admin {
         <div class="wrap logistika-wrap">
             <h1><span class="dashicons dashicons-list-view"></span> <?php _e('Log Export', 'logistika-woocommerce'); ?></h1>
 
+            <div class="logistika-card" style="margin-top: 20px;">
+                <div class="logistika-card-header">
+                    <span class="dashicons dashicons-backup"></span>
+                    <h2><?php _e('Storico Export', 'logistika-woocommerce'); ?></h2>
+                </div>
+                <div class="logistika-card-body" style="padding: 0;">
             <?php if (empty($logs)): ?>
-                <p><?php _e('Nessun export registrato.', 'logistika-woocommerce'); ?></p>
+                <p style="padding: 20px;"><?php _e('Nessun export registrato.', 'logistika-woocommerce'); ?></p>
             <?php else: ?>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
@@ -709,6 +732,8 @@ class Logistika_Admin {
                     </tbody>
                 </table>
             <?php endif; ?>
+                </div>
+            </div>
         </div>
         <?php
     }
@@ -1038,7 +1063,7 @@ class Logistika_Admin {
         $api = new Logistika_Api();
 
         if (!$api->is_configured()) {
-            wp_send_json_error(__('API non configurata. Inserisci URL e API Key.', 'logistika-woocommerce'));
+            wp_send_json_error(__('API non configurata. Inserisci la API Key.', 'logistika-woocommerce'));
         }
 
         if ($api->test_connection()) {
