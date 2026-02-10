@@ -174,12 +174,6 @@ class Logistika_Admin {
             'default' => ''
         ));
 
-        // GitHub updater setting
-        register_setting('logistika_settings', 'logistika_github_repo', array(
-            'type' => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default' => ''
-        ));
     }
 
     /**
@@ -625,22 +619,6 @@ class Logistika_Admin {
                                    value="<?php echo esc_attr(get_option('logistika_api_key', '')); ?>"
                                    class="regular-text code" placeholder="La tua API Key">
                             <p class="description"><?php _e('API Key fornita da Logistika per l\'autenticazione', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
-                </table>
-
-                <h2 class="title"><?php _e('Aggiornamenti', 'logistika-woocommerce'); ?></h2>
-
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_github_repo"><?php _e('Repository GitHub', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" name="logistika_github_repo" id="logistika_github_repo"
-                                   value="<?php echo esc_attr(get_option('logistika_github_repo', '')); ?>"
-                                   class="regular-text code" placeholder="username/logistika-woocommerce">
-                            <p class="description"><?php _e('Repository GitHub per aggiornamenti automatici (es: username/logistika-woocommerce)', 'logistika-woocommerce'); ?></p>
                         </td>
                     </tr>
                 </table>

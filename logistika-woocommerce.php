@@ -72,12 +72,8 @@ function logistika_init() {
     // Initialize classes
     new Logistika_Admin();
 
-    // Initialize updater with configured repo
-    $updater = new Logistika_Updater();
-    $repo = get_option('logistika_github_repo', '');
-    if (!empty($repo)) {
-        $updater->set_repository($repo);
-    }
+    // Initialize updater
+    new Logistika_Updater();
 }
 add_action('plugins_loaded', 'logistika_init');
 
@@ -97,7 +93,6 @@ function logistika_activate() {
         'send_method' => 'email',
         'api_url' => '',
         'api_key' => '',
-        'github_repo' => '',
     );
 
     foreach ($defaults as $key => $value) {

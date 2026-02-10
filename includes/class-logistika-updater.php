@@ -16,7 +16,7 @@ class Logistika_Updater {
     /**
      * GitHub repository
      */
-    private $repo = '';
+    private $repo = 'jwebmodica/logistika-woocommerce';
 
     /**
      * Plugin slug
@@ -63,10 +63,6 @@ class Logistika_Updater {
     private function get_github_release() {
         if (!empty($this->github_api_result)) {
             return $this->github_api_result;
-        }
-
-        if (empty($this->repo)) {
-            return false;
         }
 
         $url = "https://api.github.com/repos/{$this->repo}/releases/latest";
@@ -235,10 +231,4 @@ class Logistika_Updater {
         return $links;
     }
 
-    /**
-     * Set repository
-     */
-    public function set_repository($repo) {
-        $this->repo = $repo;
-    }
 }
