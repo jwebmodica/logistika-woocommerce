@@ -1,0 +1,37 @@
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if using build tools)
+node_modules/
+package-lock.json
+
+# Composer
+vendor/
+composer.lock
+
+# Logs
+*.log
+
+# Build
+/build/
+/dist/
+
+# Local config
+.env
+*.local.php
+
+# Temp files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Generated files
+*.mo

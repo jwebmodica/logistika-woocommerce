@@ -1,0 +1,32 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create plugin ZIP
+        run: |
+          mkdir -p logistika-woocommerce
+          cp -r assets includes languages templates logistika-woocommerce.php README.md logistika-woocommerce/
+          zip -r logistika-woocommerce-${{ steps.get_version.outputs.VERSION }}.zip logistika-woocommerce
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: logistika-woocommerce-${{ steps.get_version.outputs.VERSION }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

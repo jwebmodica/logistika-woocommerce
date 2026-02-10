@@ -1,0 +1,359 @@
+/**
+ * Logistika WooCommerce Admin Styles
+ */
+
+/* General */
+.logistika-wrap {
+    max-width: 1200px;
+}
+
+.logistika-wrap h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logistika-wrap h1 .dashicons {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+}
+
+/* Dashboard */
+.logistika-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.logistika-stats {
+    display: flex;
+    gap: 20px;
+    grid-column: 1 / -1;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+}
+
+.stat-icon {
+    background: #2271b1;
+    color: #fff;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 1;
+}
+
+.stat-label {
+    color: #646970;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* Quick Actions */
+.logistika-quick-actions {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.logistika-quick-actions h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.logistika-quick-actions .button-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 10px 0 0;
+}
+
+.logistika-quick-actions .button-hero .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Info Box */
+.logistika-info {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.logistika-info h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.logistika-info table {
+    margin-top: 10px;
+}
+
+.logistika-info table th {
+    text-align: left;
+    width: 150px;
+}
+
+/* Export Filters */
+.logistika-export-filters {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.logistika-export-filters form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.logistika-export-filters label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.logistika-export-filters input[type="date"] {
+    width: 150px;
+}
+
+/* Orders Table */
+.logistika-wrap .wp-list-table {
+    margin-top: 0;
+}
+
+.logistika-wrap .column-cb {
+    width: 30px;
+}
+
+.logistika-wrap .order-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.logistika-wrap .status-processing {
+    background: #c6e1c6;
+    color: #5b841b;
+}
+
+.logistika-wrap .status-completed {
+    background: #c8d7e1;
+    color: #2e4453;
+}
+
+.logistika-wrap .status-on-hold {
+    background: #f8dda7;
+    color: #94660c;
+}
+
+.logistika-wrap .status-pending {
+    background: #e5e5e5;
+    color: #777;
+}
+
+/* Meta Box */
+.logistika-meta-box {
+    padding: 10px 0;
+}
+
+.logistika-meta-box p {
+    margin: 0 0 15px;
+}
+
+.logistika-meta-box .button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.logistika-meta-box .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+/* Modal */
+.logistika-modal {
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logistika-modal-content {
+    background: #fff;
+    border-radius: 4px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.logistika-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+}
+
+.logistika-modal-close:hover {
+    color: #000;
+}
+
+/* CSV Preview */
+.logistika-csv-preview {
+    overflow-x: auto;
+}
+
+.logistika-csv-preview table {
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.logistika-csv-preview th,
+.logistika-csv-preview td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+}
+
+.logistika-csv-preview th {
+    background: #f1f1f1;
+    font-weight: 600;
+}
+
+/* Settings */
+.logistika-wrap .form-table th {
+    width: 250px;
+}
+
+.logistika-wrap .form-table .description {
+    color: #646970;
+    font-style: italic;
+}
+
+/* Logs */
+.logistika-wrap .dashicons-yes-alt {
+    color: #46b450;
+}
+
+.logistika-wrap .dashicons-warning {
+    color: #dc3232;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .logistika-stats {
+        flex-direction: column;
+    }
+
+    .logistika-export-filters form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .logistika-dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Loading State */
+.logistika-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.logistika-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #ccc;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: logistika-spin 0.8s linear infinite;
+}
+
+@keyframes logistika-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success/Error Messages */
+.logistika-success {
+    color: #46b450;
+    font-weight: 500;
+}
+
+.logistika-error {
+    color: #dc3232;
+    font-weight: 500;
+}
+
+/* Single Export Button */
+.logistika-single-export {
+    padding: 3px 6px !important;
+}
+
+.logistika-single-export .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 1;
+}
