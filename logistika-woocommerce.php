@@ -3,7 +3,7 @@
  * Plugin Name: Logistika WooCommerce
  * Plugin URI: https://github.com/logistika-dev/logistika-woocommerce
  * Description: Esporta ordini WooCommerce in formato CSV per la logistica e li invia via email o API REST a Logistika.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Logistika
  * Author URI: https://logistika.it
  * Text Domain: logistika-woocommerce
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('LOGISTIKA_VERSION', '1.0.0');
+define('LOGISTIKA_VERSION', '1.0.1');
 define('LOGISTIKA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('LOGISTIKA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('LOGISTIKA_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -84,12 +84,8 @@ function logistika_activate() {
     // Set default options
     $defaults = array(
         'codvet' => '40005',
-        'email_destinatario' => get_option('admin_email'),
-        'email_oggetto' => 'Nuovo ordine Logistika - {order_id}',
         'auto_export' => 'no',
         'export_status' => 'processing',
-        'date_format' => 'd/m/y',
-        'csv_separator' => ';',
         'send_method' => 'email',
         'api_url' => '',
         'api_key' => '',

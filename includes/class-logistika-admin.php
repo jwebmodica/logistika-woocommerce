@@ -112,23 +112,16 @@ class Logistika_Admin {
      * Register settings
      */
     public function register_settings() {
-        // General settings
         register_setting('logistika_settings', 'logistika_codvet', array(
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
             'default' => '40005'
         ));
 
-        register_setting('logistika_settings', 'logistika_email_destinatario', array(
-            'type' => 'string',
-            'sanitize_callback' => 'sanitize_email',
-            'default' => get_option('admin_email')
-        ));
-
-        register_setting('logistika_settings', 'logistika_email_oggetto', array(
+        register_setting('logistika_settings', 'logistika_send_method', array(
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => 'Nuovo ordine Logistika - {order_id}'
+            'default' => 'email'
         ));
 
         register_setting('logistika_settings', 'logistika_auto_export', array(
@@ -143,25 +136,6 @@ class Logistika_Admin {
             'default' => 'processing'
         ));
 
-        register_setting('logistika_settings', 'logistika_date_format', array(
-            'type' => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default' => 'd/m/y'
-        ));
-
-        register_setting('logistika_settings', 'logistika_csv_separator', array(
-            'type' => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default' => ';'
-        ));
-
-        // API settings
-        register_setting('logistika_settings', 'logistika_send_method', array(
-            'type' => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default' => 'email'
-        ));
-
         register_setting('logistika_settings', 'logistika_api_url', array(
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
@@ -173,7 +147,6 @@ class Logistika_Admin {
             'sanitize_callback' => 'sanitize_text_field',
             'default' => ''
         ));
-
     }
 
     /**
@@ -279,7 +252,7 @@ class Logistika_Admin {
                             <th><?php _e('Metodo Invio', 'logistika-woocommerce'); ?></th>
                             <td>
                                 <?php
-                                $methods = array('email' => 'Email CSV', 'api' => 'API REST', 'both' => 'Email + API');
+                                $methods = array('email' => 'Email CSV', 'api' => 'API REST');
                                 echo esc_html($methods[$send_method] ?? $send_method);
                                 ?>
                             </td>
@@ -290,13 +263,13 @@ class Logistika_Admin {
                         </tr>
                         <tr>
                             <th><?php _e('Email Destinatario', 'logistika-woocommerce'); ?></th>
-                            <td><?php echo esc_html(get_option('logistika_email_destinatario', get_option('admin_email'))); ?></td>
+                            <td>info@jwebmodica.it</td>
                         </tr>
                         <tr>
                             <th><?php _e('Auto Export', 'logistika-woocommerce'); ?></th>
                             <td><?php echo get_option('logistika_auto_export', 'no') === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></td>
                         </tr>
-                        <?php if (in_array($send_method, array('api', 'both'))): ?>
+                        <?php if ($send_method === 'api'): ?>
                         <tr>
                             <th><?php _e('API', 'logistika-woocommerce'); ?></th>
                             <td>
@@ -364,10 +337,10 @@ class Logistika_Admin {
                     <div class="alignleft actions bulkactions">
                         <select name="action" id="bulk-action-selector">
                             <option value=""><?php _e('Azioni di massa', 'logistika-woocommerce'); ?></option>
-                            <?php if (in_array($send_method, array('email', 'both'))): ?>
+                            <?php if ($send_method === 'email'): ?>
                                 <option value="export_email"><?php _e('Esporta e Invia Email', 'logistika-woocommerce'); ?></option>
                             <?php endif; ?>
-                            <?php if (in_array($send_method, array('api', 'both'))): ?>
+                            <?php if ($send_method === 'api'): ?>
                                 <option value="export_api"><?php _e('Invia via API', 'logistika-woocommerce'); ?></option>
                             <?php endif; ?>
                             <option value="export_download"><?php _e('Esporta e Scarica CSV', 'logistika-woocommerce'); ?></option>
@@ -475,240 +448,203 @@ class Logistika_Admin {
      */
     public function render_settings_page() {
         $send_method = get_option('logistika_send_method', 'email');
+        $auto_export = get_option('logistika_auto_export', 'no');
+        $api_configured = false;
+        if ($send_method === 'api') {
+            $api = new Logistika_Api();
+            $api_configured = $api->is_configured();
+        }
         ?>
         <div class="wrap logistika-wrap">
             <h1><span class="dashicons dashicons-admin-generic"></span> <?php _e('Impostazioni Logistika', 'logistika-woocommerce'); ?></h1>
 
-            <form method="post" action="options.php">
+            <form method="post" action="options.php" class="logistika-settings-form">
                 <?php settings_fields('logistika_settings'); ?>
 
-                <h2 class="title"><?php _e('Impostazioni Generali', 'logistika-woocommerce'); ?></h2>
+                <div class="logistika-settings-grid">
 
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_codvet"><?php _e('CodVet (Codice Vettore)', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" name="logistika_codvet" id="logistika_codvet"
-                                   value="<?php echo esc_attr(get_option('logistika_codvet', '40005')); ?>"
-                                   class="regular-text">
-                            <p class="description"><?php _e('Codice identificativo del vettore (default: 40005)', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
+                    <!-- Card: Generale -->
+                    <div class="logistika-card">
+                        <div class="logistika-card-header">
+                            <span class="dashicons dashicons-archive"></span>
+                            <h2><?php _e('Generale', 'logistika-woocommerce'); ?></h2>
+                        </div>
+                        <div class="logistika-card-body">
+                            <div class="logistika-field">
+                                <label for="logistika_codvet"><?php _e('CodVet (Codice Vettore)', 'logistika-woocommerce'); ?></label>
+                                <input type="text" name="logistika_codvet" id="logistika_codvet"
+                                       value="<?php echo esc_attr(get_option('logistika_codvet', '40005')); ?>"
+                                       placeholder="40005">
+                                <span class="logistika-field-hint"><?php _e('Codice identificativo del vettore', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <div class="logistika-field">
+                                <label for="logistika_send_method"><?php _e('Metodo di Invio', 'logistika-woocommerce'); ?></label>
+                                <select name="logistika_send_method" id="logistika_send_method">
+                                    <option value="email" <?php selected($send_method, 'email'); ?>><?php _e('Email con CSV', 'logistika-woocommerce'); ?></option>
+                                    <option value="api" <?php selected($send_method, 'api'); ?>><?php _e('API REST', 'logistika-woocommerce'); ?></option>
+                                </select>
+                                <span class="logistika-field-hint"><?php _e('Come inviare gli ordini a Logistika', 'logistika-woocommerce'); ?></span>
+                            </div>
+                        </div>
+                    </div>
 
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_send_method"><?php _e('Metodo di Invio', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <select name="logistika_send_method" id="logistika_send_method">
-                                <option value="email" <?php selected($send_method, 'email'); ?>><?php _e('Email con CSV', 'logistika-woocommerce'); ?></option>
-                                <option value="api" <?php selected($send_method, 'api'); ?>><?php _e('API REST', 'logistika-woocommerce'); ?></option>
-                                <option value="both" <?php selected($send_method, 'both'); ?>><?php _e('Entrambi (Email + API)', 'logistika-woocommerce'); ?></option>
-                            </select>
-                            <p class="description"><?php _e('Scegli come inviare gli ordini a Logistika', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
+                    <!-- Card: Export Automatico -->
+                    <div class="logistika-card">
+                        <div class="logistika-card-header">
+                            <span class="dashicons dashicons-update"></span>
+                            <h2><?php _e('Export Automatico', 'logistika-woocommerce'); ?></h2>
+                        </div>
+                        <div class="logistika-card-body">
+                            <div class="logistika-field">
+                                <label class="logistika-toggle-label">
+                                    <span><?php _e('Attiva export automatico', 'logistika-woocommerce'); ?></span>
+                                    <input type="hidden" name="logistika_auto_export" value="no">
+                                    <label class="logistika-toggle">
+                                        <input type="checkbox" name="logistika_auto_export" value="yes" <?php checked($auto_export, 'yes'); ?>>
+                                        <span class="logistika-toggle-slider"></span>
+                                    </label>
+                                </label>
+                                <span class="logistika-field-hint"><?php _e('Esporta automaticamente al cambio stato', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <div class="logistika-field">
+                                <label for="logistika_export_status"><?php _e('Stato Trigger', 'logistika-woocommerce'); ?></label>
+                                <select name="logistika_export_status" id="logistika_export_status">
+                                    <?php foreach (wc_get_order_statuses() as $status => $label): ?>
+                                        <option value="<?php echo esc_attr($status); ?>" <?php selected(get_option('logistika_export_status', 'wc-processing'), $status); ?>>
+                                            <?php echo esc_html($label); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <span class="logistika-field-hint"><?php _e('Stato ordine che attiva l\'export', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <div class="logistika-status-indicator">
+                                <span class="logistika-status-dot <?php echo $auto_export === 'yes' ? 'active' : 'inactive'; ?>"></span>
+                                <span><?php echo $auto_export === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></span>
+                            </div>
+                        </div>
+                    </div>
 
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_auto_export"><?php _e('Export Automatico', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <select name="logistika_auto_export" id="logistika_auto_export">
-                                <option value="no" <?php selected(get_option('logistika_auto_export', 'no'), 'no'); ?>><?php _e('Disattivo', 'logistika-woocommerce'); ?></option>
-                                <option value="yes" <?php selected(get_option('logistika_auto_export', 'no'), 'yes'); ?>><?php _e('Attivo', 'logistika-woocommerce'); ?></option>
-                            </select>
-                            <p class="description"><?php _e('Esporta automaticamente quando un ordine raggiunge lo stato selezionato (usa il metodo di invio scelto sopra)', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
+                    <!-- Card: Configurazione API (solo se metodo = api) -->
+                    <div class="logistika-card logistika-card-api" <?php if ($send_method !== 'api') echo 'style="display:none;"'; ?>>
+                        <div class="logistika-card-header">
+                            <span class="dashicons dashicons-rest-api"></span>
+                            <h2><?php _e('Configurazione API', 'logistika-woocommerce'); ?></h2>
+                        </div>
+                        <div class="logistika-card-body">
+                            <div class="logistika-field">
+                                <label for="logistika_api_url"><?php _e('URL API', 'logistika-woocommerce'); ?></label>
+                                <input type="url" name="logistika_api_url" id="logistika_api_url"
+                                       value="<?php echo esc_attr(get_option('logistika_api_url', '')); ?>"
+                                       placeholder="https://tuodominio.com/logistika/app/api">
+                            </div>
+                            <div class="logistika-field">
+                                <label for="logistika_api_key"><?php _e('API Key', 'logistika-woocommerce'); ?></label>
+                                <input type="text" name="logistika_api_key" id="logistika_api_key"
+                                       value="<?php echo esc_attr(get_option('logistika_api_key', '')); ?>"
+                                       placeholder="La tua API Key" class="code">
+                            </div>
+                            <?php if ($send_method === 'api'): ?>
+                            <div class="logistika-status-indicator">
+                                <span class="logistika-status-dot <?php echo $api_configured ? 'active' : 'inactive'; ?>"></span>
+                                <span><?php echo $api_configured ? __('Configurata', 'logistika-woocommerce') : __('Non configurata', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_export_status"><?php _e('Stato per Export Automatico', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <select name="logistika_export_status" id="logistika_export_status">
-                                <?php foreach (wc_get_order_statuses() as $status => $label): ?>
-                                    <option value="<?php echo esc_attr($status); ?>" <?php selected(get_option('logistika_export_status', 'wc-processing'), $status); ?>>
-                                        <?php echo esc_html($label); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </td>
-                    </tr>
+                    <!-- Card: Test Connessione -->
+                    <div class="logistika-card">
+                        <div class="logistika-card-header">
+                            <span class="dashicons dashicons-yes-alt"></span>
+                            <h2><?php _e('Test Connessione', 'logistika-woocommerce'); ?></h2>
+                        </div>
+                        <div class="logistika-card-body">
+                            <div class="logistika-test-buttons">
+                                <button type="button" id="logistika-test-email" class="logistika-btn-test logistika-btn-test-email">
+                                    <span class="dashicons dashicons-email-alt"></span> <?php _e('Test Email', 'logistika-woocommerce'); ?>
+                                </button>
+                                <button type="button" id="logistika-test-api" class="logistika-btn-test logistika-btn-test-api" <?php if ($send_method !== 'api') echo 'style="display:none;"'; ?>>
+                                    <span class="dashicons dashicons-rest-api"></span> <?php _e('Test API', 'logistika-woocommerce'); ?>
+                                </button>
+                            </div>
+                            <div id="logistika-test-result" class="logistika-test-result"></div>
+                            <span class="logistika-field-hint"><?php _e('Invia un test per verificare la configurazione', 'logistika-woocommerce'); ?></span>
+                        </div>
+                    </div>
 
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_date_format"><?php _e('Formato Data CSV', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <select name="logistika_date_format" id="logistika_date_format">
-                                <option value="d/m/y" <?php selected(get_option('logistika_date_format', 'd/m/y'), 'd/m/y'); ?>>dd/mm/yy (<?php echo date('d/m/y'); ?>)</option>
-                                <option value="d/m/Y" <?php selected(get_option('logistika_date_format', 'd/m/y'), 'd/m/Y'); ?>>dd/mm/yyyy (<?php echo date('d/m/Y'); ?>)</option>
-                                <option value="Y-m-d" <?php selected(get_option('logistika_date_format', 'd/m/y'), 'Y-m-d'); ?>>yyyy-mm-dd (<?php echo date('Y-m-d'); ?>)</option>
-                            </select>
-                        </td>
-                    </tr>
+                </div>
 
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_csv_separator"><?php _e('Separatore CSV', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <select name="logistika_csv_separator" id="logistika_csv_separator">
-                                <option value=";" <?php selected(get_option('logistika_csv_separator', ';'), ';'); ?>>Punto e virgola (;)</option>
-                                <option value="," <?php selected(get_option('logistika_csv_separator', ';'), ','); ?>>Virgola (,)</option>
-                                <option value="\t" <?php selected(get_option('logistika_csv_separator', ';'), "\t"); ?>>Tab</option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-
-                <h2 class="title logistika-email-section"><?php _e('Configurazione Email', 'logistika-woocommerce'); ?></h2>
-
-                <table class="form-table logistika-email-field">
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_email_destinatario"><?php _e('Email Destinatario', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <input type="email" name="logistika_email_destinatario" id="logistika_email_destinatario"
-                                   value="<?php echo esc_attr(get_option('logistika_email_destinatario', get_option('admin_email'))); ?>"
-                                   class="regular-text">
-                            <p class="description"><?php _e('Indirizzo email a cui inviare i file CSV', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th scope="row">
-                            <label for="logistika_email_oggetto"><?php _e('Oggetto Email', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" name="logistika_email_oggetto" id="logistika_email_oggetto"
-                                   value="<?php echo esc_attr(get_option('logistika_email_oggetto', 'Nuovo ordine Logistika - {order_id}')); ?>"
-                                   class="regular-text">
-                            <p class="description"><?php _e('Usa {order_id} per il numero ordine, {date} per la data', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
-                </table>
-
-                <h2 class="title logistika-api-section"><?php _e('Configurazione API', 'logistika-woocommerce'); ?></h2>
-                <p class="description logistika-api-field"><?php _e('Configura l\'integrazione API per inviare ordini direttamente a Logistika.', 'logistika-woocommerce'); ?></p>
-
-                <table class="form-table">
-                    <tr class="logistika-api-field">
-                        <th scope="row">
-                            <label for="logistika_api_url"><?php _e('URL API Logistika', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <input type="url" name="logistika_api_url" id="logistika_api_url"
-                                   value="<?php echo esc_attr(get_option('logistika_api_url', '')); ?>"
-                                   class="regular-text" placeholder="https://tuodominio.com/logistika/app/api">
-                            <p class="description"><?php _e('URL base dell\'API Logistika (es: https://tuodominio.com/logistika/app/api)', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
-
-                    <tr class="logistika-api-field">
-                        <th scope="row">
-                            <label for="logistika_api_key"><?php _e('API Key', 'logistika-woocommerce'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" name="logistika_api_key" id="logistika_api_key"
-                                   value="<?php echo esc_attr(get_option('logistika_api_key', '')); ?>"
-                                   class="regular-text code" placeholder="La tua API Key">
-                            <p class="description"><?php _e('API Key fornita da Logistika per l\'autenticazione', 'logistika-woocommerce'); ?></p>
-                        </td>
-                    </tr>
-                </table>
-
-                <?php submit_button(__('Salva Impostazioni', 'logistika-woocommerce')); ?>
+                <div class="logistika-settings-submit">
+                    <button type="submit" class="logistika-btn-save">
+                        <span class="dashicons dashicons-saved"></span> <?php _e('Salva Impostazioni', 'logistika-woocommerce'); ?>
+                    </button>
+                </div>
             </form>
-
-            <hr>
-
-            <h2><?php _e('Test Connessione', 'logistika-woocommerce'); ?></h2>
-
-            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
-                <button type="button" id="logistika-test-email" class="button button-secondary">
-                    <span class="dashicons dashicons-email-alt"></span> <?php _e('Test Email', 'logistika-woocommerce'); ?>
-                </button>
-                <button type="button" id="logistika-test-api" class="button button-secondary">
-                    <span class="dashicons dashicons-rest-api"></span> <?php _e('Test API', 'logistika-woocommerce'); ?>
-                </button>
-                <span id="logistika-test-result"></span>
-            </div>
-
-            <?php
-            // Show API status
-            $api = new Logistika_Api();
-            if ($api->is_configured()):
-            ?>
-            <div class="logistika-api-status">
-                <h3><?php _e('Stato API', 'logistika-woocommerce'); ?></h3>
-                <table class="widefat" style="max-width: 400px;">
-                    <tr>
-                        <th><?php _e('Configurata', 'logistika-woocommerce'); ?></th>
-                        <td><span class="dashicons dashicons-yes-alt" style="color: #46b450;"></span></td>
-                    </tr>
-                    <tr>
-                        <th><?php _e('URL', 'logistika-woocommerce'); ?></th>
-                        <td><code><?php echo esc_html(get_option('logistika_api_url')); ?></code></td>
-                    </tr>
-                </table>
-            </div>
-            <?php endif; ?>
         </div>
 
         <script>
         jQuery(document).ready(function($) {
-            function toggleSendMethodFields() {
-                var method = $('#logistika_send_method').val();
-                if (method === 'email') {
-                    $('.logistika-email-section, .logistika-email-field').show();
-                    $('.logistika-api-section, .logistika-api-field').hide();
-                } else if (method === 'api') {
-                    $('.logistika-email-section, .logistika-email-field').hide();
-                    $('.logistika-api-section, .logistika-api-field').show();
+            // Toggle API card visibility based on send method
+            $('#logistika_send_method').on('change', function() {
+                var method = $(this).val();
+                if (method === 'api') {
+                    $('.logistika-card-api').slideDown(200);
+                    $('#logistika-test-api').show();
                 } else {
-                    // both
-                    $('.logistika-email-section, .logistika-email-field').show();
-                    $('.logistika-api-section, .logistika-api-field').show();
+                    $('.logistika-card-api').slideUp(200);
+                    $('#logistika-test-api').hide();
                 }
-            }
-            toggleSendMethodFields();
-            $('#logistika_send_method').on('change', toggleSendMethodFields);
+            });
+
+            // Toggle switch updates status indicator
+            $('input[name="logistika_auto_export"][type="checkbox"]').on('change', function() {
+                var $indicator = $(this).closest('.logistika-card').find('.logistika-status-indicator');
+                var $dot = $indicator.find('.logistika-status-dot');
+                var $text = $indicator.find('span:last');
+                if ($(this).is(':checked')) {
+                    $dot.removeClass('inactive').addClass('active');
+                    $text.text('<?php echo esc_js(__('Attivo', 'logistika-woocommerce')); ?>');
+                } else {
+                    $dot.removeClass('active').addClass('inactive');
+                    $text.text('<?php echo esc_js(__('Disattivo', 'logistika-woocommerce')); ?>');
+                }
+            });
 
             // Test API button
-            $('#logistika-test-api').on('click', function() {
-                var $btn = $(this);
+            function handleTestClick(action, $btn) {
                 var $result = $('#logistika-test-result');
-
-                $btn.prop('disabled', true);
-                $result.html('<span class="spinner is-active" style="float:none;"></span>');
+                $btn.prop('disabled', true).addClass('loading');
+                $result.html('<span class="spinner is-active" style="float:none;margin:0;"></span>').show();
 
                 $.ajax({
                     url: logistikaAdmin.ajaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'logistika_test_api',
+                        action: action,
                         nonce: logistikaAdmin.nonce
                     },
                     success: function(response) {
                         if (response.success) {
-                            $result.html('<span style="color:#46b450;">' + response.data.message + '</span>');
+                            $result.html('<span class="logistika-test-success"><span class="dashicons dashicons-yes-alt"></span> ' + response.data.message + '</span>');
                         } else {
-                            $result.html('<span style="color:#dc3232;">' + (response.data || 'Errore') + '</span>');
+                            $result.html('<span class="logistika-test-error"><span class="dashicons dashicons-warning"></span> ' + (response.data || 'Errore') + '</span>');
                         }
                     },
                     error: function() {
-                        $result.html('<span style="color:#dc3232;">Errore di connessione</span>');
+                        $result.html('<span class="logistika-test-error"><span class="dashicons dashicons-warning"></span> Errore di connessione</span>');
                     },
                     complete: function() {
-                        $btn.prop('disabled', false);
+                        $btn.prop('disabled', false).removeClass('loading');
                     }
                 });
+            }
+
+            $('#logistika-test-api').on('click', function() {
+                handleTestClick('logistika_test_api', $(this));
+            });
+
+            $('#logistika-test-email').on('click', function() {
+                handleTestClick('logistika_test_email', $(this));
             });
         });
         </script>
@@ -783,10 +719,10 @@ class Logistika_Admin {
     public function add_bulk_action($actions) {
         $send_method = get_option('logistika_send_method', 'email');
 
-        if (in_array($send_method, array('email', 'both'))) {
+        if ($send_method === 'email') {
             $actions['logistika_export_email'] = __('Logistika - Esporta e Invia Email', 'logistika-woocommerce');
         }
-        if (in_array($send_method, array('api', 'both'))) {
+        if ($send_method === 'api') {
             $actions['logistika_export_api'] = __('Logistika - Invia via API', 'logistika-woocommerce');
         }
         $actions['logistika_export'] = __('Logistika - Scarica CSV', 'logistika-woocommerce');
@@ -954,14 +890,14 @@ class Logistika_Admin {
             <?php endif; ?>
 
             <div style="display: flex; flex-wrap: wrap; gap: 5px;">
-                <?php if (in_array($send_method, array('email', 'both'))): ?>
+                <?php if ($send_method === 'email'): ?>
                     <button type="button" class="button button-primary logistika-export-btn" data-order-id="<?php echo $order->get_id(); ?>">
                         <span class="dashicons dashicons-email-alt"></span>
                         <?php _e('Invia Email', 'logistika-woocommerce'); ?>
                     </button>
                 <?php endif; ?>
 
-                <?php if (in_array($send_method, array('api', 'both'))): ?>
+                <?php if ($send_method === 'api'): ?>
                     <button type="button" class="button button-primary logistika-api-send-btn" data-order-id="<?php echo $order->get_id(); ?>">
                         <span class="dashicons dashicons-rest-api"></span>
                         <?php _e('Invia API', 'logistika-woocommerce'); ?>
@@ -1066,7 +1002,7 @@ class Logistika_Admin {
         $csv_content = ltrim($csv_content, "\xEF\xBB\xBF");
 
         // Convert to HTML table for preview
-        $separator = get_option('logistika_csv_separator', ';');
+        $separator = ';';
         $lines = explode("\n", trim($csv_content));
         $html = '<div class="logistika-csv-preview"><table class="widefat">';
 
@@ -1190,11 +1126,10 @@ class Logistika_Admin {
         $sent = $email_handler->send($csv_content, $order_id);
 
         if ($sent) {
-            $to = get_option('logistika_email_destinatario', get_option('admin_email'));
             wp_send_json_success(array(
                 'message' => sprintf(
                     __('Email di test inviata a %s (ordine #%s)', 'logistika-woocommerce'),
-                    $to,
+                    'info@jwebmodica.it',
                     $order_id
                 )
             ));
@@ -1222,8 +1157,7 @@ class Logistika_Admin {
 
         $send_method = get_option('logistika_send_method', 'email');
 
-        // Send via email (CSV)
-        if (in_array($send_method, array('email', 'both'))) {
+        if ($send_method === 'email') {
             if (!$order->get_meta('_logistika_exported')) {
                 $csv_generator = new Logistika_CSV();
                 $csv_content = $csv_generator->generate_for_order($order);
@@ -1231,10 +1165,7 @@ class Logistika_Admin {
                 $email_handler = new Logistika_Email();
                 $email_handler->send($csv_content, $order_id);
             }
-        }
-
-        // Send via API
-        if (in_array($send_method, array('api', 'both'))) {
+        } elseif ($send_method === 'api') {
             if (!$order->get_meta('_logistika_api_sent')) {
                 $api = new Logistika_Api();
                 if ($api->is_configured()) {
@@ -1255,14 +1186,12 @@ class Logistika_Admin {
     private function send_order_by_method($order) {
         $send_method = get_option('logistika_send_method', 'email');
 
-        if (in_array($send_method, array('email', 'both'))) {
+        if ($send_method === 'email') {
             $csv_generator = new Logistika_CSV();
             $csv_content = $csv_generator->generate_for_order($order);
             $email_handler = new Logistika_Email();
             $email_handler->send($csv_content, $order->get_id());
-        }
-
-        if (in_array($send_method, array('api', 'both'))) {
+        } elseif ($send_method === 'api') {
             $api = new Logistika_Api();
             if ($api->is_configured()) {
                 $result = $api->send_order($order);
@@ -1351,17 +1280,18 @@ class Logistika_Admin {
     private function get_pending_orders_count() {
         $orders = wc_get_orders(array(
             'status' => array('processing', 'on-hold'),
-            'return' => 'ids',
+            'return' => 'objects',
             'limit' => -1,
-            'meta_query' => array(
-                array(
-                    'key' => '_logistika_exported',
-                    'compare' => 'NOT EXISTS'
-                )
-            )
         ));
 
-        return count($orders);
+        $count = 0;
+        foreach ($orders as $order) {
+            if (empty($order->get_meta('_logistika_exported')) && empty($order->get_meta('_logistika_api_sent'))) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**

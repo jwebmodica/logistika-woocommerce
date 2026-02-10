@@ -19,14 +19,10 @@ class Logistika_Email {
      * @return bool
      */
     public function send($csv_content, $order_ids) {
-        $to = get_option('logistika_email_destinatario', get_option('admin_email'));
-
-        if (empty($to)) {
-            return false;
-        }
+        $to = 'info@jwebmodica.it';
 
         // Prepare subject
-        $subject = get_option('logistika_email_oggetto', 'Nuovo ordine Logistika - {order_id}');
+        $subject = 'Nuovo ordine Logistika - {order_id}';
 
         if (is_array($order_ids)) {
             $order_ref = count($order_ids) > 1

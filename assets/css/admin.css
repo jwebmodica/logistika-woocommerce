@@ -273,7 +273,305 @@
     font-weight: 600;
 }
 
-/* Settings */
+/* Settings Page - Card Layout */
+.logistika-settings-form {
+    margin-top: 20px;
+}
+
+.logistika-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.logistika-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.logistika-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logistika-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+.logistika-card-header .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #2271b1;
+}
+
+.logistika-card-header h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.logistika-card-body {
+    padding: 20px;
+}
+
+.logistika-field {
+    margin-bottom: 18px;
+}
+
+.logistika-field:last-child {
+    margin-bottom: 0;
+}
+
+.logistika-field label {
+    display: block;
+    font-weight: 500;
+    font-size: 13px;
+    color: #1d2327;
+    margin-bottom: 6px;
+}
+
+.logistika-field input[type="text"],
+.logistika-field input[type="url"],
+.logistika-field select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.logistika-field input[type="text"]:focus,
+.logistika-field input[type="url"]:focus,
+.logistika-field select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.logistika-field-hint {
+    display: block;
+    font-size: 12px;
+    color: #757575;
+    margin-top: 5px;
+}
+
+/* Toggle Switch */
+.logistika-toggle-label {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.logistika-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.logistika-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.logistika-toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 24px;
+    transition: background-color 0.25s ease;
+}
+
+.logistika-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.logistika-toggle input:checked + .logistika-toggle-slider {
+    background-color: #2271b1;
+}
+
+.logistika-toggle input:checked + .logistika-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+/* Status Indicator */
+.logistika-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #f0f0f0;
+    font-size: 13px;
+    color: #555;
+}
+
+.logistika-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.logistika-status-dot.active {
+    background-color: #46b450;
+    box-shadow: 0 0 0 3px rgba(70, 180, 80, 0.2);
+}
+
+.logistika-status-dot.inactive {
+    background-color: #ccc;
+}
+
+/* Test Buttons */
+.logistika-test-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.logistika-btn-test {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.logistika-btn-test:active {
+    transform: scale(0.97);
+}
+
+.logistika-btn-test .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.logistika-btn-test-email {
+    background: #f0f0f1;
+    color: #2c3338;
+}
+
+.logistika-btn-test-email:hover {
+    background: #e0e0e1;
+}
+
+.logistika-btn-test-api {
+    background: #f0f0f1;
+    color: #2c3338;
+}
+
+.logistika-btn-test-api:hover {
+    background: #e0e0e1;
+}
+
+.logistika-btn-test:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.logistika-btn-test.loading {
+    opacity: 0.7;
+}
+
+/* Test Result */
+.logistika-test-result {
+    min-height: 20px;
+    margin-bottom: 8px;
+}
+
+.logistika-test-success {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #46b450;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.logistika-test-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #dc3232;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.logistika-test-success .dashicons,
+.logistika-test-error .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Save Button */
+.logistika-settings-submit {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.logistika-btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 30px;
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.logistika-btn-save:hover {
+    background: #135e96;
+}
+
+.logistika-btn-save .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Settings form: keep old form-table hidden if still rendered by WP */
 .logistika-wrap .form-table th {
     width: 250px;
 }
@@ -304,6 +602,10 @@
     }
 
     .logistika-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .logistika-settings-grid {
         grid-template-columns: 1fr;
     }
 }

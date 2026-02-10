@@ -40,16 +40,10 @@ class Logistika_CSV {
     );
 
     /**
-     * CSV Separator
+     * CSV Separator (hardcoded)
      */
-    private $separator;
+    private $separator = ';';
 
-    /**
-     * Constructor
-     */
-    public function __construct() {
-        $this->separator = get_option('logistika_csv_separator', ';');
-    }
 
     /**
      * Generate CSV for single order
@@ -127,7 +121,7 @@ class Logistika_CSV {
      */
     private function get_order_data($order) {
         $codvet = get_option('logistika_codvet', '40005');
-        $date_format = get_option('logistika_date_format', 'd/m/y');
+        $date_format = 'd/m/y';
 
         // Determine if COD (contrassegno)
         $is_cod = $order->get_payment_method() === 'cod';
