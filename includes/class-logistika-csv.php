@@ -126,7 +126,7 @@ class Logistika_CSV {
         // Determine if COD (contrassegno)
         $is_cod = $order->get_payment_method() === 'cod';
         $cod_amount = $is_cod ? $this->format_price($order->get_total()) : '';
-        $cod_code = $is_cod ? '04' : '';
+        $cod_code = $is_cod ? '04' : '01';
 
         // Get billing/shipping data
         $shipping_first_name = $order->get_shipping_first_name();
@@ -210,6 +210,11 @@ class Logistika_CSV {
     }
 
     /**
+     * Fields that must be forced as text in CSV (to preserve leading zeros)
+     */
+    private $text_fields = array('CAPDESTZCLI', 'TELDESTZCLI', 'CodPor');
+
+    /**
      * Build CSV content from rows
      *
      * Uses raw implode (no quoting) to match Logistika expected format.
@@ -230,6 +235,10 @@ class Logistika_CSV {
                 $value = isset($row[$header]) ? $row[$header] : '';
                 // Strip separator and newlines from values to prevent corruption
                 $value = str_replace(array($this->separator, "\r", "\n"), '', $value);
+                // Force text format for fields that need to preserve leading zeros
+                if (in_array($header, $this->text_fields) && $value !== '') {
+                    $value = '="' . $value . '"';
+                }
                 $csv_row[] = $value;
             }
             $lines[] = implode($this->separator, $csv_row);

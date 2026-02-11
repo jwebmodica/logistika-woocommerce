@@ -50,9 +50,6 @@ class Logistika_Admin {
         add_action('wp_ajax_logistika_send_via_api', array($this, 'ajax_send_via_api'));
         add_action('wp_ajax_logistika_test_email', array($this, 'ajax_test_email'));
 
-        // Auto export on order status change (unified handler)
-        add_action('woocommerce_order_status_changed', array($this, 'maybe_auto_export'), 10, 4);
-
         // Add settings link on plugins page
         add_filter('plugin_action_links_' . LOGISTIKA_PLUGIN_BASENAME, array($this, 'add_settings_link'));
     }
@@ -61,7 +58,7 @@ class Logistika_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        $icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#009CDC"/><text x="10" y="14" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">Ka</text></svg>');
+        $icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#009CDC"/><path d="M6 5h2v4.2L11.8 5H14.2L10 9.8 14.5 15.5H12L8.5 10.8 8 11.4V15.5H6Z" fill="#fff"/></svg>');
 
         add_menu_page(
             __('Logistika', 'logistika-woocommerce'),
@@ -213,7 +210,13 @@ class Logistika_Admin {
 
         ?>
         <div class="wrap logistika-wrap">
-            <h1><span class="dashicons dashicons-truck"></span> <?php _e('Logistika Dashboard', 'logistika-woocommerce'); ?></h1>
+            <div class="logistika-hero">
+                <img src="<?php echo LOGISTIKA_PLUGIN_URL . 'assets/img/logistika-logo.png'; ?>" alt="Logistika" class="logistika-hero-logo">
+                <div class="logistika-hero-text">
+                    <h1><?php _e('Logistika Dashboard', 'logistika-woocommerce'); ?></h1>
+                    <p><?php _e('Gestisci e automatizza l\'export dei tuoi ordini WooCommerce verso il sistema logistico. Esporta in formato CSV, invia via email o API e monitora lo stato delle spedizioni.', 'logistika-woocommerce'); ?></p>
+                </div>
+            </div>
 
             <div class="logistika-dashboard">
                 <div class="logistika-stats">
@@ -1211,46 +1214,6 @@ class Logistika_Admin {
             ));
         } else {
             wp_send_json_error(__('Errore invio email di test', 'logistika-woocommerce'));
-        }
-    }
-
-    /**
-     * Auto export on status change (unified handler)
-     *
-     * Respects the send_method setting: email, api, or both.
-     */
-    public function maybe_auto_export($order_id, $old_status, $new_status, $order) {
-        if (get_option('logistika_auto_export', 'no') !== 'yes') {
-            return;
-        }
-
-        $target_status = get_option('logistika_export_status', 'wc-processing');
-        $target_status = str_replace('wc-', '', $target_status);
-
-        if ($new_status !== $target_status) {
-            return;
-        }
-
-        $send_method = get_option('logistika_send_method', 'email');
-
-        if ($send_method === 'email') {
-            if (!$order->get_meta('_logistika_exported')) {
-                $csv_generator = new Logistika_CSV();
-                $csv_content = $csv_generator->generate_for_order($order);
-
-                $email_handler = new Logistika_Email();
-                $email_handler->send($csv_content, $order_id);
-            }
-        } elseif ($send_method === 'api') {
-            if (!$order->get_meta('_logistika_api_sent')) {
-                $api = new Logistika_Api();
-                if ($api->is_configured()) {
-                    $result = $api->send_order($order);
-                    if ($result) {
-                        $this->log_export(array($order_id), 'api', 'API', true);
-                    }
-                }
-            }
         }
     }
 

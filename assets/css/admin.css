@@ -19,6 +19,39 @@
     height: 30px;
 }
 
+/* Hero Section */
+.logistika-hero {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.logistika-hero-logo {
+    max-height: 50px;
+    width: auto;
+    flex-shrink: 0;
+}
+
+.logistika-hero-text h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.logistika-hero-text p {
+    margin: 0;
+    font-size: 13px;
+    color: #646970;
+    line-height: 1.5;
+}
+
 /* Dashboard */
 .logistika-dashboard {
     display: grid;
