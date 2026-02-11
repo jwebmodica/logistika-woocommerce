@@ -3,7 +3,7 @@
  * Plugin Name: Logistika WooCommerce
  * Plugin URI: https://github.com/logistika-dev/logistika-woocommerce
  * Description: Esporta ordini WooCommerce in formato CSV per la logistica e li invia via email o API REST a Logistika.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Logistika
  * Author URI: https://logistika.it
  * Text Domain: logistika-woocommerce
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('LOGISTIKA_VERSION', '1.0.5');
+define('LOGISTIKA_VERSION', '1.0.6');
 define('LOGISTIKA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('LOGISTIKA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('LOGISTIKA_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -89,7 +89,6 @@ function logistika_activate() {
         'send_method' => 'email',
         'api_key' => '',
         'email' => '',
-        'cron_enabled' => 'no',
         'cron_interval' => '1h',
     );
 
@@ -160,13 +159,10 @@ add_action('logistika_cron_export', function() {
 });
 
 /**
- * Reschedule cron when auto_export setting changes (primary toggle)
+ * Reschedule cron when auto_export mode changes
  */
 add_action('update_option_logistika_auto_export', function($old_value, $new_value) {
-    // Sync cron_enabled with auto_export
-    update_option('logistika_cron_enabled', $new_value);
-
-    if ($new_value === 'yes') {
+    if ($new_value === 'cron') {
         $interval = get_option('logistika_cron_interval', '1h');
         $schedule_name = 'logistika_' . $interval;
 
@@ -181,11 +177,10 @@ add_action('update_option_logistika_auto_export', function($old_value, $new_valu
  * Reschedule cron when interval changes
  */
 add_action('update_option_logistika_cron_interval', function($old_value, $new_value) {
-    if (get_option('logistika_auto_export', 'no') !== 'yes') {
+    if (get_option('logistika_auto_export', 'no') !== 'cron') {
         return;
     }
 
-    // Clear old schedule and set new one
     wp_clear_scheduled_hook('logistika_cron_export');
     $schedule_name = 'logistika_' . $new_value;
     wp_schedule_event(time(), $schedule_name, 'logistika_cron_export');
