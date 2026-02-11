@@ -313,6 +313,7 @@
 }
 
 .logistika-field input[type="text"],
+.logistika-field input[type="email"],
 .logistika-field input[type="url"],
 .logistika-field select {
     width: 100%;
@@ -325,6 +326,7 @@
 }
 
 .logistika-field input[type="text"]:focus,
+.logistika-field input[type="email"]:focus,
 .logistika-field input[type="url"]:focus,
 .logistika-field select:focus {
     border-color: #2271b1;

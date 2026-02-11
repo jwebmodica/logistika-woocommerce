@@ -542,16 +542,22 @@ class Logistika_Admin {
                             <h2><?php _e('Export Automatico', 'logistika-woocommerce'); ?></h2>
                         </div>
                         <div class="logistika-card-body">
+                            <?php
+                            $cron_enabled = get_option('logistika_cron_enabled', 'no');
+                            $cron_interval = get_option('logistika_cron_interval', '1h');
+                            $next_scheduled = wp_next_scheduled('logistika_cron_export');
+                            ?>
                             <div class="logistika-field">
                                 <label class="logistika-toggle-label">
                                     <span><?php _e('Attiva export automatico', 'logistika-woocommerce'); ?></span>
                                     <input type="hidden" name="logistika_auto_export" value="no">
+                                    <input type="hidden" name="logistika_cron_enabled" value="no">
                                     <label class="logistika-toggle">
-                                        <input type="checkbox" name="logistika_auto_export" value="yes" <?php checked($auto_export, 'yes'); ?>>
+                                        <input type="checkbox" name="logistika_auto_export" value="yes" <?php checked($auto_export, 'yes'); ?> class="logistika-auto-export-toggle">
                                         <span class="logistika-toggle-slider"></span>
                                     </label>
                                 </label>
-                                <span class="logistika-field-hint"><?php _e('Esporta automaticamente al cambio stato', 'logistika-woocommerce'); ?></span>
+                                <span class="logistika-field-hint"><?php _e('Esporta automaticamente gli ordini al cambio stato e a intervalli regolari', 'logistika-woocommerce'); ?></span>
                             </div>
                             <div class="logistika-field">
                                 <label for="logistika_export_status"><?php _e('Stato Trigger', 'logistika-woocommerce'); ?></label>
@@ -562,40 +568,10 @@ class Logistika_Admin {
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <span class="logistika-field-hint"><?php _e('Stato ordine che attiva l\'export', 'logistika-woocommerce'); ?></span>
-                            </div>
-                            <div class="logistika-status-indicator">
-                                <span class="logistika-status-dot <?php echo $auto_export === 'yes' ? 'active' : 'inactive'; ?>"></span>
-                                <span><?php echo $auto_export === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card: Export Schedulato -->
-                    <div class="logistika-card">
-                        <div class="logistika-card-header">
-                            <span class="dashicons dashicons-clock"></span>
-                            <h2><?php _e('Export Schedulato', 'logistika-woocommerce'); ?></h2>
-                        </div>
-                        <div class="logistika-card-body">
-                            <?php
-                            $cron_enabled = get_option('logistika_cron_enabled', 'no');
-                            $cron_interval = get_option('logistika_cron_interval', '1h');
-                            $next_scheduled = wp_next_scheduled('logistika_cron_export');
-                            ?>
-                            <div class="logistika-field">
-                                <label class="logistika-toggle-label">
-                                    <span><?php _e('Attiva export schedulato', 'logistika-woocommerce'); ?></span>
-                                    <input type="hidden" name="logistika_cron_enabled" value="no">
-                                    <label class="logistika-toggle">
-                                        <input type="checkbox" name="logistika_cron_enabled" value="yes" <?php checked($cron_enabled, 'yes'); ?>>
-                                        <span class="logistika-toggle-slider"></span>
-                                    </label>
-                                </label>
-                                <span class="logistika-field-hint"><?php _e('Invia automaticamente gli ordini pronti (non ancora esportati) a intervalli regolari', 'logistika-woocommerce'); ?></span>
+                                <span class="logistika-field-hint"><?php _e('Stato ordine che attiva l\'export automatico', 'logistika-woocommerce'); ?></span>
                             </div>
                             <div class="logistika-field">
-                                <label for="logistika_cron_interval"><?php _e('Intervallo', 'logistika-woocommerce'); ?></label>
+                                <label for="logistika_cron_interval"><?php _e('Frequenza Invio Schedulato', 'logistika-woocommerce'); ?></label>
                                 <select name="logistika_cron_interval" id="logistika_cron_interval">
                                     <option value="30min" <?php selected($cron_interval, '30min'); ?>><?php _e('Ogni 30 minuti', 'logistika-woocommerce'); ?></option>
                                     <option value="1h" <?php selected($cron_interval, '1h'); ?>><?php _e('Ogni ora', 'logistika-woocommerce'); ?></option>
@@ -605,12 +581,12 @@ class Logistika_Admin {
                                     <option value="12h" <?php selected($cron_interval, '12h'); ?>><?php _e('Ogni 12 ore', 'logistika-woocommerce'); ?></option>
                                     <option value="24h" <?php selected($cron_interval, '24h'); ?>><?php _e('Ogni 24 ore', 'logistika-woocommerce'); ?></option>
                                 </select>
-                                <span class="logistika-field-hint"><?php _e('Frequenza di invio automatico degli ordini', 'logistika-woocommerce'); ?></span>
+                                <span class="logistika-field-hint"><?php _e('Invia automaticamente gli ordini pronti (non ancora esportati) a intervalli regolari', 'logistika-woocommerce'); ?></span>
                             </div>
                             <div class="logistika-status-indicator">
-                                <span class="logistika-status-dot <?php echo $cron_enabled === 'yes' ? 'active' : 'inactive'; ?>"></span>
-                                <span><?php echo $cron_enabled === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></span>
-                                <?php if ($cron_enabled === 'yes' && $next_scheduled): ?>
+                                <span class="logistika-status-dot <?php echo $auto_export === 'yes' ? 'active' : 'inactive'; ?>"></span>
+                                <span><?php echo $auto_export === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></span>
+                                <?php if ($auto_export === 'yes' && $next_scheduled): ?>
                                     <br><small><?php printf(__('Prossima esecuzione: %s', 'logistika-woocommerce'), date_i18n('d/m/Y H:i:s', $next_scheduled)); ?></small>
                                 <?php endif; ?>
                             </div>
@@ -684,12 +660,16 @@ class Logistika_Admin {
                 }
             });
 
-            // Toggle switch updates status indicator (auto export & cron)
-            $('input[name="logistika_auto_export"][type="checkbox"], input[name="logistika_cron_enabled"][type="checkbox"]').on('change', function() {
+            // Toggle switch: sync auto_export with cron_enabled and update status indicator
+            $('.logistika-auto-export-toggle').on('change', function() {
+                var checked = $(this).is(':checked');
+                // Sync hidden cron_enabled with auto_export toggle
+                $('input[name="logistika_cron_enabled"][type="hidden"]').val(checked ? 'yes' : 'no');
+
                 var $indicator = $(this).closest('.logistika-card').find('.logistika-status-indicator');
                 var $dot = $indicator.find('.logistika-status-dot');
-                var $text = $indicator.find('span:last');
-                if ($(this).is(':checked')) {
+                var $text = $indicator.find('> span:last-of-type');
+                if (checked) {
                     $dot.removeClass('inactive').addClass('active');
                     $text.text('<?php echo esc_js(__('Attivo', 'logistika-woocommerce')); ?>');
                 } else {
@@ -1440,7 +1420,7 @@ class Logistika_Admin {
      * Cron export: send pending orders automatically
      */
     public function cron_export() {
-        if (get_option('logistika_cron_enabled', 'no') !== 'yes') {
+        if (get_option('logistika_auto_export', 'no') !== 'yes') {
             return;
         }
 

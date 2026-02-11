@@ -3,7 +3,7 @@
  * Plugin Name: Logistika WooCommerce
  * Plugin URI: https://github.com/logistika-dev/logistika-woocommerce
  * Description: Esporta ordini WooCommerce in formato CSV per la logistica e li invia via email o API REST a Logistika.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Logistika
  * Author URI: https://logistika.it
  * Text Domain: logistika-woocommerce
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('LOGISTIKA_VERSION', '1.0.3');
+define('LOGISTIKA_VERSION', '1.0.4');
 define('LOGISTIKA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('LOGISTIKA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('LOGISTIKA_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -160,23 +160,28 @@ add_action('logistika_cron_export', function() {
 });
 
 /**
- * Reschedule cron when settings change
+ * Reschedule cron when auto_export setting changes (primary toggle)
  */
-add_action('update_option_logistika_cron_enabled', function($old_value, $new_value) {
+add_action('update_option_logistika_auto_export', function($old_value, $new_value) {
+    // Sync cron_enabled with auto_export
+    update_option('logistika_cron_enabled', $new_value);
+
     if ($new_value === 'yes') {
         $interval = get_option('logistika_cron_interval', '1h');
         $schedule_name = 'logistika_' . $interval;
 
-        if (!wp_next_scheduled('logistika_cron_export')) {
-            wp_schedule_event(time(), $schedule_name, 'logistika_cron_export');
-        }
+        wp_clear_scheduled_hook('logistika_cron_export');
+        wp_schedule_event(time(), $schedule_name, 'logistika_cron_export');
     } else {
         wp_clear_scheduled_hook('logistika_cron_export');
     }
 }, 10, 2);
 
+/**
+ * Reschedule cron when interval changes
+ */
 add_action('update_option_logistika_cron_interval', function($old_value, $new_value) {
-    if (get_option('logistika_cron_enabled', 'no') !== 'yes') {
+    if (get_option('logistika_auto_export', 'no') !== 'yes') {
         return;
     }
 
