@@ -3,7 +3,7 @@
  * Plugin Name: Logistika WooCommerce
  * Plugin URI: https://github.com/logistika-dev/logistika-woocommerce
  * Description: Esporta ordini WooCommerce in formato CSV per la logistica e li invia via email o API REST a Logistika.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Logistika
  * Author URI: https://logistika.it
  * Text Domain: logistika-woocommerce
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('LOGISTIKA_VERSION', '1.0.2');
+define('LOGISTIKA_VERSION', '1.0.3');
 define('LOGISTIKA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('LOGISTIKA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('LOGISTIKA_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -88,6 +88,9 @@ function logistika_activate() {
         'export_status' => 'processing',
         'send_method' => 'email',
         'api_key' => '',
+        'email' => '',
+        'cron_enabled' => 'no',
+        'cron_interval' => '1h',
     );
 
     foreach ($defaults as $key => $value) {
@@ -113,6 +116,9 @@ register_activation_hook(__FILE__, 'logistika_activate');
 function logistika_deactivate() {
     // Cleanup transients
     delete_transient('logistika_github_release');
+
+    // Clear scheduled cron
+    wp_clear_scheduled_hook('logistika_cron_export');
 }
 register_deactivation_hook(__FILE__, 'logistika_deactivate');
 
@@ -124,3 +130,58 @@ add_action('before_woocommerce_init', function() {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
     }
 });
+
+/**
+ * Register custom cron schedules
+ */
+add_filter('cron_schedules', function($schedules) {
+    $intervals = array(
+        'logistika_30min' => array('interval' => 1800,  'display' => 'Ogni 30 minuti'),
+        'logistika_1h'    => array('interval' => 3600,  'display' => 'Ogni ora'),
+        'logistika_2h'    => array('interval' => 7200,  'display' => 'Ogni 2 ore'),
+        'logistika_3h'    => array('interval' => 10800, 'display' => 'Ogni 3 ore'),
+        'logistika_6h'    => array('interval' => 21600, 'display' => 'Ogni 6 ore'),
+        'logistika_12h'   => array('interval' => 43200, 'display' => 'Ogni 12 ore'),
+        'logistika_24h'   => array('interval' => 86400, 'display' => 'Ogni 24 ore'),
+    );
+
+    return array_merge($schedules, $intervals);
+});
+
+/**
+ * Cron export action callback
+ */
+add_action('logistika_cron_export', function() {
+    if (!class_exists('Logistika_Admin')) {
+        return;
+    }
+    $admin = new Logistika_Admin();
+    $admin->cron_export();
+});
+
+/**
+ * Reschedule cron when settings change
+ */
+add_action('update_option_logistika_cron_enabled', function($old_value, $new_value) {
+    if ($new_value === 'yes') {
+        $interval = get_option('logistika_cron_interval', '1h');
+        $schedule_name = 'logistika_' . $interval;
+
+        if (!wp_next_scheduled('logistika_cron_export')) {
+            wp_schedule_event(time(), $schedule_name, 'logistika_cron_export');
+        }
+    } else {
+        wp_clear_scheduled_hook('logistika_cron_export');
+    }
+}, 10, 2);
+
+add_action('update_option_logistika_cron_interval', function($old_value, $new_value) {
+    if (get_option('logistika_cron_enabled', 'no') !== 'yes') {
+        return;
+    }
+
+    // Clear old schedule and set new one
+    wp_clear_scheduled_hook('logistika_cron_export');
+    $schedule_name = 'logistika_' . $new_value;
+    wp_schedule_event(time(), $schedule_name, 'logistika_cron_export');
+}, 10, 2);

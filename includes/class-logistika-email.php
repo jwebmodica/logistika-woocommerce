@@ -19,7 +19,12 @@ class Logistika_Email {
      * @return bool
      */
     public function send($csv_content, $order_ids) {
-        $to = 'info@jwebmodica.it';
+        $to = get_option('logistika_email', '');
+
+        if (empty($to)) {
+            error_log('Logistika: Email destinatario non configurata. Vai in Logistika > Impostazioni.');
+            return false;
+        }
 
         // Prepare subject
         $subject = 'Nuovo ordine Logistika - {order_id}';

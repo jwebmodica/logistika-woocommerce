@@ -143,6 +143,24 @@ class Logistika_Admin {
             'sanitize_callback' => 'sanitize_text_field',
             'default' => ''
         ));
+
+        register_setting('logistika_settings', 'logistika_email', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_email',
+            'default' => ''
+        ));
+
+        register_setting('logistika_settings', 'logistika_cron_enabled', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'no'
+        ));
+
+        register_setting('logistika_settings', 'logistika_cron_interval', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => '1h'
+        ));
     }
 
     /**
@@ -268,7 +286,7 @@ class Logistika_Admin {
                         </tr>
                         <tr>
                             <th><?php _e('Email Destinatario', 'logistika-woocommerce'); ?></th>
-                            <td>info@jwebmodica.it</td>
+                            <td><?php echo esc_html(get_option('logistika_email', '—')); ?></td>
                         </tr>
                         <tr>
                             <th><?php _e('Auto Export', 'logistika-woocommerce'); ?></th>
@@ -500,6 +518,13 @@ class Logistika_Admin {
                                 <span class="logistika-field-hint"><?php _e('Codice identificativo del vettore', 'logistika-woocommerce'); ?></span>
                             </div>
                             <div class="logistika-field">
+                                <label for="logistika_email"><?php _e('Email Destinatario', 'logistika-woocommerce'); ?></label>
+                                <input type="email" name="logistika_email" id="logistika_email"
+                                       value="<?php echo esc_attr(get_option('logistika_email', '')); ?>"
+                                       placeholder="email@esempio.it">
+                                <span class="logistika-field-hint"><?php _e('Indirizzo email a cui inviare i CSV degli ordini', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <div class="logistika-field">
                                 <label for="logistika_send_method"><?php _e('Metodo di Invio', 'logistika-woocommerce'); ?></label>
                                 <select name="logistika_send_method" id="logistika_send_method">
                                     <option value="email" <?php selected($send_method, 'email'); ?>><?php _e('Email con CSV', 'logistika-woocommerce'); ?></option>
@@ -542,6 +567,52 @@ class Logistika_Admin {
                             <div class="logistika-status-indicator">
                                 <span class="logistika-status-dot <?php echo $auto_export === 'yes' ? 'active' : 'inactive'; ?>"></span>
                                 <span><?php echo $auto_export === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Export Schedulato -->
+                    <div class="logistika-card">
+                        <div class="logistika-card-header">
+                            <span class="dashicons dashicons-clock"></span>
+                            <h2><?php _e('Export Schedulato', 'logistika-woocommerce'); ?></h2>
+                        </div>
+                        <div class="logistika-card-body">
+                            <?php
+                            $cron_enabled = get_option('logistika_cron_enabled', 'no');
+                            $cron_interval = get_option('logistika_cron_interval', '1h');
+                            $next_scheduled = wp_next_scheduled('logistika_cron_export');
+                            ?>
+                            <div class="logistika-field">
+                                <label class="logistika-toggle-label">
+                                    <span><?php _e('Attiva export schedulato', 'logistika-woocommerce'); ?></span>
+                                    <input type="hidden" name="logistika_cron_enabled" value="no">
+                                    <label class="logistika-toggle">
+                                        <input type="checkbox" name="logistika_cron_enabled" value="yes" <?php checked($cron_enabled, 'yes'); ?>>
+                                        <span class="logistika-toggle-slider"></span>
+                                    </label>
+                                </label>
+                                <span class="logistika-field-hint"><?php _e('Invia automaticamente gli ordini pronti (non ancora esportati) a intervalli regolari', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <div class="logistika-field">
+                                <label for="logistika_cron_interval"><?php _e('Intervallo', 'logistika-woocommerce'); ?></label>
+                                <select name="logistika_cron_interval" id="logistika_cron_interval">
+                                    <option value="30min" <?php selected($cron_interval, '30min'); ?>><?php _e('Ogni 30 minuti', 'logistika-woocommerce'); ?></option>
+                                    <option value="1h" <?php selected($cron_interval, '1h'); ?>><?php _e('Ogni ora', 'logistika-woocommerce'); ?></option>
+                                    <option value="2h" <?php selected($cron_interval, '2h'); ?>><?php _e('Ogni 2 ore', 'logistika-woocommerce'); ?></option>
+                                    <option value="3h" <?php selected($cron_interval, '3h'); ?>><?php _e('Ogni 3 ore', 'logistika-woocommerce'); ?></option>
+                                    <option value="6h" <?php selected($cron_interval, '6h'); ?>><?php _e('Ogni 6 ore', 'logistika-woocommerce'); ?></option>
+                                    <option value="12h" <?php selected($cron_interval, '12h'); ?>><?php _e('Ogni 12 ore', 'logistika-woocommerce'); ?></option>
+                                    <option value="24h" <?php selected($cron_interval, '24h'); ?>><?php _e('Ogni 24 ore', 'logistika-woocommerce'); ?></option>
+                                </select>
+                                <span class="logistika-field-hint"><?php _e('Frequenza di invio automatico degli ordini', 'logistika-woocommerce'); ?></span>
+                            </div>
+                            <div class="logistika-status-indicator">
+                                <span class="logistika-status-dot <?php echo $cron_enabled === 'yes' ? 'active' : 'inactive'; ?>"></span>
+                                <span><?php echo $cron_enabled === 'yes' ? __('Attivo', 'logistika-woocommerce') : __('Disattivo', 'logistika-woocommerce'); ?></span>
+                                <?php if ($cron_enabled === 'yes' && $next_scheduled): ?>
+                                    <br><small><?php printf(__('Prossima esecuzione: %s', 'logistika-woocommerce'), date_i18n('d/m/Y H:i:s', $next_scheduled)); ?></small>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -613,8 +684,8 @@ class Logistika_Admin {
                 }
             });
 
-            // Toggle switch updates status indicator
-            $('input[name="logistika_auto_export"][type="checkbox"]').on('change', function() {
+            // Toggle switch updates status indicator (auto export & cron)
+            $('input[name="logistika_auto_export"][type="checkbox"], input[name="logistika_cron_enabled"][type="checkbox"]').on('change', function() {
                 var $indicator = $(this).closest('.logistika-card').find('.logistika-status-indicator');
                 var $dot = $indicator.find('.logistika-status-dot');
                 var $text = $indicator.find('span:last');
@@ -1154,7 +1225,7 @@ class Logistika_Admin {
             wp_send_json_success(array(
                 'message' => sprintf(
                     __('Email di test inviata a %s (ordine #%s)', 'logistika-woocommerce'),
-                    'info@jwebmodica.it',
+                    get_option('logistika_email', '—'),
                     $order_id
                 )
             ));
@@ -1362,6 +1433,68 @@ class Logistika_Admin {
             $upload_dir = wp_upload_dir();
             $download_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $filepath);
             echo '<div class="notice notice-success"><p>' . __('Export completato!', 'logistika-woocommerce') . ' <a href="' . esc_url($download_url) . '" download>' . __('Scarica CSV', 'logistika-woocommerce') . '</a></p></div>';
+        }
+    }
+
+    /**
+     * Cron export: send pending orders automatically
+     */
+    public function cron_export() {
+        if (get_option('logistika_cron_enabled', 'no') !== 'yes') {
+            return;
+        }
+
+        $export_status = get_option('logistika_export_status', 'wc-processing');
+
+        // Query orders with target status that haven't been exported yet
+        $orders = wc_get_orders(array(
+            'status' => $export_status,
+            'limit' => -1,
+            'return' => 'objects',
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => '_logistika_exported',
+                    'compare' => 'NOT EXISTS',
+                ),
+                array(
+                    'key' => '_logistika_api_sent',
+                    'compare' => 'NOT EXISTS',
+                ),
+            ),
+        ));
+
+        if (empty($orders)) {
+            return;
+        }
+
+        $send_method = get_option('logistika_send_method', 'email');
+        $order_ids = array_map(function($order) { return $order->get_id(); }, $orders);
+
+        if ($send_method === 'email') {
+            $csv_generator = new Logistika_CSV();
+            $csv_content = $csv_generator->generate_for_orders($order_ids);
+
+            $email_handler = new Logistika_Email();
+            $sent = $email_handler->send($csv_content, $order_ids);
+
+            if (!$sent) {
+                error_log('Logistika Cron: Errore invio email per ' . count($order_ids) . ' ordini');
+            }
+        } elseif ($send_method === 'api') {
+            $api = new Logistika_Api();
+            if ($api->is_configured()) {
+                foreach ($orders as $order) {
+                    $result = $api->send_order($order);
+                    if ($result) {
+                        $this->log_export(array($order->get_id()), 'api', 'API', true);
+                    } else {
+                        error_log('Logistika Cron: Errore invio API per ordine #' . $order->get_id());
+                    }
+                }
+            } else {
+                error_log('Logistika Cron: API non configurata');
+            }
         }
     }
 
