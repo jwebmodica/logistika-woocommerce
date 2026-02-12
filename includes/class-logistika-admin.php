@@ -204,6 +204,7 @@ class Logistika_Admin {
         $week_exports = $this->get_exports_count('week');
         $pending_orders = $this->get_pending_orders_count();
         $send_method = get_option('logistika_send_method', 'email');
+        $auto_export = get_option('logistika_auto_export', 'no');
 
         ?>
         <div class="wrap logistika-wrap">
