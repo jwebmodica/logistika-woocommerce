@@ -1452,23 +1452,21 @@ class Logistika_Admin {
 
         $export_status = get_option('logistika_export_status', 'wc-processing');
 
-        // Query orders with target status that haven't been exported yet
+        // Query orders with target status
+        // NOTE: meta_query NOT EXISTS is unreliable with WooCommerce HPOS,
+        // so we filter in PHP using get_meta() which works with any storage backend
         $orders = wc_get_orders(array(
             'status' => $export_status,
             'limit' => -1,
             'return' => 'objects',
-            'meta_query' => array(
-                'relation' => 'AND',
-                array(
-                    'key' => '_logistika_exported',
-                    'compare' => 'NOT EXISTS',
-                ),
-                array(
-                    'key' => '_logistika_api_sent',
-                    'compare' => 'NOT EXISTS',
-                ),
-            ),
         ));
+
+        // Filter out already exported orders (HPOS-compatible)
+        $orders = array_filter($orders, function($order) {
+            return empty($order->get_meta('_logistika_exported'))
+                && empty($order->get_meta('_logistika_api_sent'));
+        });
+        $orders = array_values($orders);
 
         if (empty($orders)) {
             return;
@@ -1484,7 +1482,16 @@ class Logistika_Admin {
             $email_handler = new Logistika_Email();
             $sent = $email_handler->send($csv_content, $order_ids);
 
-            if (!$sent) {
+            if ($sent) {
+                // Mark orders as exported (safety net — Email::log_export also sets this,
+                // but we ensure it here in case the sub-class flow changes)
+                foreach ($orders as $order) {
+                    if (empty($order->get_meta('_logistika_exported'))) {
+                        $order->update_meta_data('_logistika_exported', current_time('mysql'));
+                        $order->save();
+                    }
+                }
+            } else {
                 error_log('Logistika Cron: Errore invio email per ' . count($order_ids) . ' ordini');
             }
         } elseif ($send_method === 'api') {
@@ -1493,6 +1500,12 @@ class Logistika_Admin {
                 foreach ($orders as $order) {
                     $result = $api->send_order($order);
                     if ($result) {
+                        // Mark as exported (safety net — Api::send_order also sets _logistika_api_sent,
+                        // but only when response contains data.id)
+                        if (empty($order->get_meta('_logistika_api_sent'))) {
+                            $order->update_meta_data('_logistika_api_sent', current_time('mysql'));
+                            $order->save();
+                        }
                         $this->log_export(array($order->get_id()), 'api', 'API', true);
                     } else {
                         error_log('Logistika Cron: Errore invio API per ordine #' . $order->get_id());
