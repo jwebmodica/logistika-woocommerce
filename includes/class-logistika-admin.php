@@ -61,7 +61,7 @@ class Logistika_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        $icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#009CDC"/><path d="M6 5h2v4.2L11.8 5H14.2L10 9.8 14.5 15.5H12L8.5 10.8 8 11.4V15.5H6Z" fill="#fff"/></svg>');
+        $icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#009CDC"/><path d="M6 5h2v4.2L11.8 5H14.2L10 9.8 14.5 15.5H12L8.5 10.8 8 11.4V15.5H6Z" fill="#000"/></svg>');
 
         add_menu_page(
             __('Logistika', 'logistika-woocommerce'),
